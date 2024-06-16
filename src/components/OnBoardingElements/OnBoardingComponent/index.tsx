@@ -27,13 +27,13 @@ export const OnBoardingComponent: FC<ContentulOnBoardingFieldsType> = ({ onBoard
 
   const handleNextStep = () => {
     if (currentStep !== null) {
-      setCurrentStep((prevStep) => (prevStep + 1) % onBoardingScreens.length);
+      setCurrentStep((prevStep) => (prevStep! + 1) % onBoardingScreens.length);
     }
   };
 
   const handlePreviousStep = () => {
     if (currentStep !== null) {
-      setCurrentStep((prevStep) => (prevStep - 1 + onBoardingScreens.length) % onBoardingScreens.length);
+      setCurrentStep((prevStep) => (prevStep! - 1 + onBoardingScreens.length) % onBoardingScreens.length);
     }
   };
 
