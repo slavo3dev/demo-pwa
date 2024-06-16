@@ -1,12 +1,22 @@
-import { useState, FC } from 'react';
+import { useState, useEffect, FC } from 'react';
 import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
 import { ContentulOnBoardingFieldsType } from '@/types';
 import Image from "next/image";
 
-
 export const OnBoardingComponent: FC<ContentulOnBoardingFieldsType> = ({ onBoardingScreens }) => {
-  const [currentStep, setCurrentStep] = useState(0);
-  
+  const [currentStep, setCurrentStep] = useState<number | null>(null);
+
+  useEffect(() => {
+    const savedStep = localStorage.getItem('currentStep');
+    setCurrentStep(savedStep ? Number(savedStep) : 0);
+  }, []);
+
+  useEffect(() => {
+    if (currentStep !== null) {
+      localStorage.setItem('currentStep', currentStep.toString());
+    }
+  }, [currentStep]);
+
   const sortOnBoardingScreens = onBoardingScreens
     .map((screen) => screen.fields)
     .sort((a: any, b: any) => {
@@ -16,20 +26,31 @@ export const OnBoardingComponent: FC<ContentulOnBoardingFieldsType> = ({ onBoard
     });
 
   const handleNextStep = () => {
-    setCurrentStep((prevStep) => (prevStep + 1) % onBoardingScreens.length);
+    if (currentStep !== null) {
+      setCurrentStep((prevStep) => (prevStep + 1) % onBoardingScreens.length);
+    }
   };
 
   const handlePreviousStep = () => {
-    setCurrentStep((prevStep) => (prevStep - 1 + onBoardingScreens.length) % onBoardingScreens.length);
+    if (currentStep !== null) {
+      setCurrentStep((prevStep) => (prevStep - 1 + onBoardingScreens.length) % onBoardingScreens.length);
+    }
   };
 
-    const currentScreen: any = sortOnBoardingScreens[ currentStep ];
-    const totalSteps = onBoardingScreens.length;
-    const progressWidth = ((currentStep - 1) / (totalSteps - 2)) * 94; 
+  if (currentStep === null) {
+    // Render a loading state or nothing until currentStep is determined
+    return null;
+  }
+
+  const currentScreen: any = sortOnBoardingScreens[currentStep];
+  const totalSteps = onBoardingScreens.length;
+  const progressWidth = currentStep > 0 
+    ? (currentStep / (totalSteps - 1)) * 94 
+    : 0;
 
   return (
     <div className="relative flex flex-col items-center bg-white rounded-lg p-4 w-full max-w-md mx-auto min-h-screen h-screen">
-      <div className="absolute top-4 left-4 right-4 flex items-center justify-between w-full">
+      <div className="absolute top-4 left-0 right-0 flex items-center justify-between px-4">
         {currentStep !== 0 && (
           <div
             onClick={handlePreviousStep}
@@ -52,7 +73,7 @@ export const OnBoardingComponent: FC<ContentulOnBoardingFieldsType> = ({ onBoard
           </div>
         )}
         {currentStep > 0 && (
-          <div className="flex-grow mx-4">
+          <div className="flex-grow mx-4 flex justify-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="94"
@@ -67,18 +88,19 @@ export const OnBoardingComponent: FC<ContentulOnBoardingFieldsType> = ({ onBoard
           </div>
         )}
       </div>
-      <div className="flex flex-col items-center justify-center flex-1 text-center">
+      <div className="flex flex-col items-center justify-center flex-1 text-center mt-12">
         {currentScreen.img && (
           <Image
             src={currentScreen.img.fields.file.url}
             alt={currentScreen.img.fields.title}
-            width={129}
-            height={39}
+            width={132}
+            height={32}
             className="flex flex-col items-start gap-2"
           />
         )}
         <div>
-          <h1 className="text-black font-bold text-4xl leading-snug">{currentScreen.screenTitle}</h1>
+          <h1 className="text-black font-bold text-4xl leading-snug">{currentScreen.title}</h1>
+          <h2 className="text-black text-xl">{currentScreen.screenTitle}</h2>
           {currentScreen.description && (
             <div className="text-black text-base leading-6">
               {documentToReactComponents(currentScreen.description)}
