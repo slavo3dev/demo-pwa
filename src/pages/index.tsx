@@ -19,7 +19,6 @@ export default Home;
 
 export const getServerSideProps: GetServerSideProps<ContentulOnBoardingFieldsType> = async () => {
   const onBoardingScreens = await fetchEntries('onBoarding');
-  console.log(onBoardingScreens);
   return {
     props: {
       onBoardingScreens
