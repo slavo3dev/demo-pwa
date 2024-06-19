@@ -22,8 +22,10 @@ export const OnBoardingComponent: FC<ContentulOnBoardingFieldsType> = ({ onBoard
   const sortOnBoardingScreens = onBoardingScreens
     .map((screen) => screen.fields)
     .sort((a: any, b: any) => {
-      const stepA = parseInt(a.title.match(/Step-(\d+)/)[1]);
-      const stepB = parseInt(b.title.match(/Step-(\d+)/)[1]);
+      const matchA = a.title.match(/Step-(\d+)/);
+      const matchB = b.title.match(/Step-(\d+)/);
+      const stepA = matchA ? parseInt(matchA[1]) : Number.MAX_VALUE; // Assign a large number if no match
+      const stepB = matchB ? parseInt(matchB[1]) : Number.MAX_VALUE;
       return stepA - stepB;
     });
 
